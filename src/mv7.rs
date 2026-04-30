@@ -6,12 +6,54 @@ const PID: u16 = 0x1012;
 const INTERFACE: i32 = 3;
 const REPORT_SIZE: usize = 64;
 
-pub struct Mv7 {
-    device: HidDevice,
-    was_locked: bool,
+pub trait Transport {
+    fn send(&self, cmd: &str) -> Result<(), String>;
+    fn read(&self, timeout_ms: i32) -> Result<Option<String>, String>;
 }
 
-impl Mv7 {
+pub struct HidTransport {
+    device: HidDevice,
+}
+
+pub struct Mv7<T: Transport = HidTransport> {
+    transport: T,
+    was_locked: bool,
+    restore_lock_armed: bool,
+}
+
+impl Transport for HidTransport {
+    fn send(&self, cmd: &str) -> Result<(), String> {
+        let mut report = [0u8; REPORT_SIZE + 1];
+        let bytes = cmd.as_bytes();
+        let len = bytes.len().min(REPORT_SIZE);
+        report[1..=len].copy_from_slice(&bytes[..len]);
+        self.device
+            .write(&report)
+            .map_err(|e| format!("HID write failed ({cmd:?}): {e}"))?;
+        Ok(())
+    }
+
+    fn read(&self, timeout_ms: i32) -> Result<Option<String>, String> {
+        let mut buf = [0u8; REPORT_SIZE];
+        let len = self
+            .device
+            .read_timeout(&mut buf, timeout_ms)
+            .map_err(|e| format!("HID read failed: {e}"))?;
+        if len == 0 {
+            return Ok(None);
+        }
+
+        let end = buf.iter().position(|&b| b == 0).unwrap_or(len);
+        let message = String::from_utf8_lossy(&buf[..end]).trim().to_string();
+        if message.is_empty() {
+            Ok(None)
+        } else {
+            Ok(Some(message))
+        }
+    }
+}
+
+impl Mv7<HidTransport> {
     pub fn open() -> Result<Self, String> {
         let api = HidApi::new().map_err(|e| format!("HID init failed: {e}"))?;
 
@@ -28,10 +70,17 @@ impl Mv7 {
             .open_device(&api)
             .map_err(|e| format!("Failed to open MV7: {e}"))?;
 
-        Ok(Self {
-            device,
+        Ok(Self::new(HidTransport { device }))
+    }
+}
+
+impl<T: Transport> Mv7<T> {
+    pub fn new(transport: T) -> Self {
+        Self {
+            transport,
             was_locked: false,
-        })
+            restore_lock_armed: false,
+        }
     }
 
     pub fn init(&mut self) -> Result<(), String> {
@@ -40,6 +89,7 @@ impl Mv7 {
         self.send("bootDSP C")?;
         self.wait_for("dspBooted", Duration::from_secs(5))?;
         self.was_locked = self.get_lock()?;
+        self.restore_lock_armed = self.was_locked;
         if self.was_locked {
             self.set_lock(false)?;
         }
@@ -47,11 +97,16 @@ impl Mv7 {
     }
 
     /// Re-lock the device if it was locked when we opened it.
-    pub fn restore_lock(&self) -> Result<(), String> {
-        if self.was_locked {
+    pub fn restore_lock(&mut self) -> Result<(), String> {
+        if self.restore_lock_armed {
             self.set_lock(true)?;
+            self.restore_lock_armed = false;
         }
         Ok(())
+    }
+
+    pub fn cancel_restore_lock(&mut self) {
+        self.restore_lock_armed = false;
     }
 
     /// Returns the lock state as it was before this invocation unlocked it.
@@ -63,7 +118,7 @@ impl Mv7 {
         self.send("lock")?;
         let deadline = Instant::now() + Duration::from_secs(2);
         while Instant::now() < deadline {
-            if let Some(msg) = self.read(200) {
+            if let Some(msg) = self.read(200)? {
                 if msg.contains("lock=on") {
                     return Ok(true);
                 }
@@ -84,7 +139,7 @@ impl Mv7 {
         self.send("micMute")?;
         let deadline = Instant::now() + Duration::from_secs(2);
         while Instant::now() < deadline {
-            if let Some(msg) = self.read(200) {
+            if let Some(msg) = self.read(200)? {
                 if msg.contains("micMute=on") {
                     return Ok(true);
                 }
@@ -109,36 +164,28 @@ impl Mv7 {
     }
 
     fn send(&self, cmd: &str) -> Result<(), String> {
-        let mut report = [0u8; REPORT_SIZE + 1]; // report ID 0 + 64 bytes
-        let bytes = cmd.as_bytes();
-        let len = bytes.len().min(REPORT_SIZE);
-        report[1..=len].copy_from_slice(&bytes[..len]);
-        self.device
-            .write(&report)
-            .map_err(|e| format!("HID write failed ({cmd:?}): {e}"))?;
-        Ok(())
+        self.transport.send(cmd)
     }
 
-    fn read(&self, timeout_ms: i32) -> Option<String> {
-        let mut buf = [0u8; REPORT_SIZE];
-        let len = self.device.read_timeout(&mut buf, timeout_ms).ok()?;
-        if len == 0 {
-            return None;
-        }
-        let end = buf.iter().position(|&b| b == 0).unwrap_or(len);
-        let s = String::from_utf8_lossy(&buf[..end]).trim().to_string();
-        if s.is_empty() { None } else { Some(s) }
+    fn read(&self, timeout_ms: i32) -> Result<Option<String>, String> {
+        self.transport.read(timeout_ms)
     }
 
     fn wait_for(&self, needle: &str, timeout: Duration) -> Result<(), String> {
         let deadline = Instant::now() + timeout;
         while Instant::now() < deadline {
-            if let Some(msg) = self.read(200) {
-                if msg.contains(needle) {
-                    return Ok(());
-                }
+            if let Some(msg) = self.read(200)?
+                && msg.contains(needle)
+            {
+                return Ok(());
             }
         }
         Err(format!("Timeout waiting for {needle:?}"))
+    }
+}
+
+impl<T: Transport> Drop for Mv7<T> {
+    fn drop(&mut self) {
+        let _ = self.restore_lock();
     }
 }
