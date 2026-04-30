@@ -18,15 +18,33 @@ mv7mute off          # unmute
 mv7mute status       # print mute state and lock state
 mv7mute lock         # lock the device
 mv7mute unlock       # unlock the device
+mv7mute version      # print version information
+mv7mute --version    # same as the version subcommand
 ```
 
 ## Installation
+
+### GitHub Releases
+
+Download the latest archive, installer, or script from the repository's GitHub Releases page.
+
+- Windows: `.zip` and PowerShell installer
+- macOS: `.tar.gz` archive and shell installer
+- Linux: `.tar.gz` archive and shell installer
+
+### Build from source
 
 ```powershell
 cargo build --release
 ```
 
 Binary: `target\release\mv7mute.exe`
+
+## Release Process
+
+- Pull requests and pushes run `cargo test` and `cargo clippy --all-targets --all-features` in GitHub Actions.
+- Pushes to `main` run release-plz, which maintains a release PR and creates the version tag when that PR is merged.
+- Pushed version tags trigger cargo-dist's release pipeline: a plan step validates the tag, platform jobs build the archives and installers, and the final announce step creates the GitHub Release with cargo-dist-generated notes.
 
 ### Hotkey binding
 

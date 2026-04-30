@@ -17,9 +17,24 @@ pub enum Command {
     Lock,
     /// Unlock the device
     Unlock,
+    /// Print version information
+    Version,
+}
+
+impl Command {
+    fn output_without_device(self) -> Option<Vec<String>> {
+        match self {
+            Self::Version => Some(vec![format!("mv7mute {}", env!("CARGO_PKG_VERSION"))]),
+            _ => None,
+        }
+    }
 }
 
 pub fn run(command: Command) -> Result<Vec<String>, String> {
+    if let Some(lines) = command.output_without_device() {
+        return Ok(lines);
+    }
+
     let mut mv7 = Mv7::open()?;
     run_with_mv7(&mut mv7, command)
 }
@@ -72,6 +87,7 @@ fn execute_command<T: Transport>(
             mv7.set_lock(false)?;
             Ok(vec!["unlocked".to_string()])
         }
+        Command::Version => unreachable!("info commands are handled before device access"),
     }
 }
 

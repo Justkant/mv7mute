@@ -1,5 +1,5 @@
 use super::support::run_scripted;
-use crate::Command;
+use crate::{Command, run};
 
 #[test]
 fn toggle_restores_lock_when_device_started_locked() {
@@ -99,5 +99,15 @@ fn status_restores_lock_and_reports_original_state() {
     assert_eq!(
         state.sent.borrow().last().map(String::as_str),
         Some("lock on")
+    );
+}
+
+#[test]
+fn version_returns_package_version_without_device_io() {
+    let result = run(Command::Version);
+
+    assert_eq!(
+        result.unwrap(),
+        vec![format!("mv7mute {}", env!("CARGO_PKG_VERSION"))]
     );
 }

@@ -1,0 +1,238 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  DIST_VERSION: 0.31.0
+  DIST_BIN: ${{ github.workspace }}/.cargo-home/bin/dist
+
+jobs:
+  plan:
+    name: Plan release
+    runs-on: ubuntu-latest
+    outputs:
+      manifest: ${{ steps.plan.outputs.manifest }}
+      tag: ${{ steps.plan.outputs.tag }}
+      tag-flag: ${{ steps.plan.outputs.tag-flag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install Linux system dependencies
+        run: sudo apt-get update && sudo apt-get install --yes pkg-config libudev-dev jq
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
+        with:
+          toolchain: stable
+
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@dc19f1e48450eefe5a29b8da6c6b00a87d730b37
+        with:
+          version: "1.18.1"
+
+      - name: Install cargo-dist
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: cargo binstall --disable-telemetry --no-confirm --force cargo-dist@${{ env.DIST_VERSION }}
+
+      - name: Plan distribution
+        id: plan
+        shell: bash
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: |
+          "$DIST_BIN" host --allow-dirty --steps=create --tag=${{ github.ref_name }} --output-format=json > plan-dist-manifest.json
+          echo "manifest=$(jq -c '.' plan-dist-manifest.json)" >> "$GITHUB_OUTPUT"
+          echo "tag=$(jq --raw-output '.announcement_tag' plan-dist-manifest.json)" >> "$GITHUB_OUTPUT"
+          echo "tag-flag=--tag=$(jq --raw-output '.announcement_tag' plan-dist-manifest.json) --force-tag" >> "$GITHUB_OUTPUT"
+
+      - name: Upload plan manifest
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: artifacts-plan-dist-manifest
+          path: plan-dist-manifest.json
+
+  build-local-artifacts:
+    name: Build local artifacts (${{ matrix.target }})
+    needs:
+      - plan
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - os: macos-26-intel
+            target: x86_64-apple-darwin
+          - os: macos-26
+            target: aarch64-apple-darwin
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install Linux system dependencies
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install --yes pkg-config libudev-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
+        with:
+          toolchain: stable
+          targets: ${{ matrix.target }}
+
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@dc19f1e48450eefe5a29b8da6c6b00a87d730b37
+        with:
+          version: "1.18.1"
+
+      - name: Install cargo-dist
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: cargo binstall --disable-telemetry --no-confirm --force cargo-dist@${{ env.DIST_VERSION }}
+
+      - name: Build target artifacts
+        shell: bash
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: |
+          "$DIST_BIN" build --allow-dirty --artifacts=local --target=${{ matrix.target }} --tag=${{ needs.plan.outputs.tag }} --output-format=json --no-local-paths
+
+      - name: Upload target artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: artifacts-build-local-${{ matrix.target }}
+          path: |
+            target/distrib/*
+
+  build-global-artifacts:
+    name: Build global artifacts
+    needs:
+      - plan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install Linux system dependencies
+        run: sudo apt-get update && sudo apt-get install --yes pkg-config libudev-dev
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
+        with:
+          toolchain: stable
+
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@dc19f1e48450eefe5a29b8da6c6b00a87d730b37
+        with:
+          version: "1.18.1"
+
+      - name: Install cargo-dist
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: cargo binstall --disable-telemetry --no-confirm --force cargo-dist@${{ env.DIST_VERSION }}
+
+      - name: Build global artifacts
+        shell: bash
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: |
+          "$DIST_BIN" build --allow-dirty --artifacts=global --tag=${{ needs.plan.outputs.tag }} --output-format=json --no-local-paths
+
+      - name: Upload global artifacts
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: artifacts-build-global
+          path: |
+            target/distrib/*
+
+  announce:
+    name: Announce release
+    needs:
+      - plan
+      - build-local-artifacts
+      - build-global-artifacts
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
+
+      - name: Install Linux system dependencies
+        run: sudo apt-get update && sudo apt-get install --yes pkg-config libudev-dev jq
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@3c5f7ea28cd621ae0bf5283f0e981fb97b8a7af9
+        with:
+          toolchain: stable
+
+      - name: Install cargo-binstall
+        uses: cargo-bins/cargo-binstall@dc19f1e48450eefe5a29b8da6c6b00a87d730b37
+        with:
+          version: "1.18.1"
+
+      - name: Install cargo-dist
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: cargo binstall --disable-telemetry --no-confirm --force cargo-dist@${{ env.DIST_VERSION }}
+
+      - name: Download built artifacts
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c
+        with:
+          pattern: artifacts-*
+          path: target/distrib/
+          merge-multiple: true
+
+      - name: Generate release manifest
+        id: host
+        shell: bash
+        env:
+          CARGO_HOME: ${{ github.workspace }}/.cargo-home
+        run: |
+          "$DIST_BIN" host --allow-dirty ${{ needs.plan.outputs.tag-flag }} --steps=announce --output-format=json > dist-manifest.json
+          echo "manifest=$(jq -c '.' dist-manifest.json)" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare release assets
+        shell: bash
+        run: |
+          mkdir -p release-artifacts
+          mapfile -d '' assets < <(find target/distrib -maxdepth 1 -type f \
+            ! -name 'dist-manifest.json' \
+            ! -name '*dist-manifest*.json' \
+            -print0)
+
+          if [ "${#assets[@]}" -eq 0 ]; then
+            echo "No release assets were found in target/distrib"
+            exit 1
+          fi
+
+          cp "${assets[@]}" release-artifacts/
+
+      - name: Write release notes
+        shell: bash
+        env:
+          ANNOUNCEMENT_BODY: ${{ fromJson(steps.host.outputs.manifest).announcement_github_body }}
+        run: |
+          printf '%s' "$ANNOUNCEMENT_BODY" > "$RUNNER_TEMP/notes.txt"
+
+      - name: Create GitHub release
+        shell: bash
+        env:
+          ANNOUNCEMENT_TITLE: ${{ fromJson(steps.host.outputs.manifest).announcement_title }}
+          PRERELEASE_FLAG: ${{ fromJson(steps.host.outputs.manifest).announcement_is_prerelease && '--prerelease' || '' }}
+        run: |
+          gh release create "${{ needs.plan.outputs.tag }}" release-artifacts/* \
+            --target "${{ github.sha }}" \
+            --title "$ANNOUNCEMENT_TITLE" \
+            --notes-file "$RUNNER_TEMP/notes.txt" \
+            $PRERELEASE_FLAG

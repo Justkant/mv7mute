@@ -1,8 +1,8 @@
 use clap::Parser;
-use mv7mute::{run, Command};
+use mv7mute::{Command, run};
 
 #[derive(Parser)]
-#[command(name = "mv7mute", about = "Toggle mute on the Shure MV7")]
+#[command(name = "mv7mute", about = "Toggle mute on the Shure MV7", version)]
 struct Cli {
     #[command(subcommand)]
     command: Option<Command>,
