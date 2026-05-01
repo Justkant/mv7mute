@@ -9,7 +9,6 @@ readme = "../README.md"
 license = "MIT"
 keywords = ["mv7", "shure", "mute", "tray"]
 categories = ["gui"]
-publish = false
 
 [package.metadata.dist]
 dist = true

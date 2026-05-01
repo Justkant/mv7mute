@@ -9,7 +9,6 @@ readme = "../README.md"
 license = "MIT"
 keywords = ["mv7", "shure", "mute", "audio", "cli"]
 categories = ["command-line-utilities"]
-publish = false
 
 [package.metadata.dist]
 dist = true
