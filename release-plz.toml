@@ -5,6 +5,7 @@ release_always = false
 changelog_path = "CHANGELOG.md"
 repo_url = "https://github.com/Justkant/mv7mute"
 pr_labels = ["release"]
+git_tag_name = "{{ package }}-v{{ version }}"
 
 [[package]]
 name = "mv7mute"
