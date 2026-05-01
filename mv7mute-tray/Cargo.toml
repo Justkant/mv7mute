@@ -22,7 +22,7 @@ license = false
 eula = false
 
 [dependencies]
-mv7mute-core = { path = "../mv7mute-core" }
+mv7mute-core = { version = "0.1.0", path = "../mv7mute-core" }
 single-instance = "0.3.3"
 tray-icon = "0.23.1"
 winit = "0.30.12"
