@@ -2,7 +2,7 @@
 git_only = false
 publish = false
 release = false
-release_always = false
+release_always = true
 repo_url = "https://github.com/Justkant/mv7mute"
 pr_labels = ["release"]
 
