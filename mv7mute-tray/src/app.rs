@@ -4,7 +4,15 @@ use mv7mute_core::DeviceState;
 use std::sync::mpsc::Sender;
 use std::thread;
 use tray_icon::menu::{Menu, MenuEvent, MenuId, MenuItem, PredefinedMenuItem};
-use tray_icon::{MouseButton, MouseButtonState, TrayIcon, TrayIconBuilder, TrayIconEvent};
+use tray_icon::{TrayIcon, TrayIconBuilder, TrayIconEvent};
+#[cfg(not(any(
+    target_os = "linux",
+    target_os = "dragonfly",
+    target_os = "freebsd",
+    target_os = "netbsd",
+    target_os = "openbsd"
+)))]
+use tray_icon::{MouseButton, MouseButtonState};
 use winit::application::ApplicationHandler;
 use winit::event::{StartCause, WindowEvent};
 use winit::event_loop::ActiveEventLoop;
@@ -174,7 +182,7 @@ impl App {
         }
     }
 
-    fn handle_tray_event(&mut self, event: TrayIconEvent) {
+    fn handle_tray_event(&mut self, _event: TrayIconEvent) {
         #[cfg(not(any(
             target_os = "linux",
             target_os = "dragonfly",
@@ -186,7 +194,7 @@ impl App {
             button: MouseButton::Left,
             button_state: MouseButtonState::Up,
             ..
-        } = event
+        } = _event
         {
             self.request_toggle();
         }
