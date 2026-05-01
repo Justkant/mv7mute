@@ -81,6 +81,28 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd
 
+      - name: Install WiX Toolset
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: |
+          choco install wixtoolset --no-progress --yes
+          $wixDir = Get-ChildItem 'C:\Program Files (x86)' -Directory |
+            Where-Object { $_.Name -like 'WiX Toolset v3*' } |
+            Sort-Object Name -Descending |
+            Select-Object -First 1
+
+          if (-not $wixDir) {
+            throw 'WiX Toolset installation directory was not found.'
+          }
+
+          $wixBin = Join-Path $wixDir.FullName 'bin'
+          if (-not (Test-Path (Join-Path $wixBin 'candle.exe'))) {
+            throw "candle.exe was not found in $wixBin"
+          }
+
+          "WIX=$($wixDir.FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          $wixBin | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
       - name: Install Linux system dependencies
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install --yes pkg-config libudev-dev libgtk-3-dev libxdo-dev

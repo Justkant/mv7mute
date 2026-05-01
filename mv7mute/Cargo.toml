@@ -4,6 +4,7 @@ version = "0.1.1"
 edition = "2024"
 rust-version = "1.85"
 description = "Atomic CLI to control mute and lock state on the Shure MV7"
+authors = ["Justkant"]
 repository = "https://github.com/Justkant/mv7mute"
 readme = "../README.md"
 license = "MIT"
@@ -12,6 +13,13 @@ categories = ["command-line-utilities"]
 
 [package.metadata.dist]
 dist = true
+
+[package.metadata.wix]
+manufacturer = "Justkant"
+upgrade-guid = "1D81E725-B47D-4AC1-9F9D-71A02BE9C103"
+path-guid = "B7137037-0E0C-488E-B4C5-18B9B1CB6FFE"
+license = false
+eula = false
 
 [dependencies]
 clap = { version = "4.6.1", features = ["derive"] }

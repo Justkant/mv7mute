@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2024"
 rust-version = "1.85"
 description = "System tray controller for mv7mute"
+authors = ["Justkant"]
 repository = "https://github.com/Justkant/mv7mute"
 readme = "../README.md"
 license = "MIT"
@@ -12,6 +13,13 @@ categories = ["gui"]
 
 [package.metadata.dist]
 dist = true
+
+[package.metadata.wix]
+upgrade-guid = "1C46CA45-AFA3-4AE2-94CA-55B0BE10B9AB"
+path-guid = "B6BD1C45-4A0B-48D7-B161-C4161158701A"
+manufacturer = "Justkant"
+license = false
+eula = false
 
 [dependencies]
 mv7mute-core = { path = "../mv7mute-core" }
