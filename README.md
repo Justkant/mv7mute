@@ -1,6 +1,6 @@
 # mv7mute
 
-A minimal CLI to toggle mute on the **Shure MV7**, designed to be bound to a global hotkey. Works on Windows, macOS, and Linux — anywhere `hidapi` can access the device.
+A minimal MV7 mute toolkit with a reusable core crate, a thin CLI, and a tray app. The CLI is designed for hotkey binding, and the tray app provides a cross-platform desktop surface built with `winit` and `tray-icon`.
 
 ## The Problem
 
@@ -22,6 +22,14 @@ mv7mute version      # print version information
 mv7mute --version    # same as the version subcommand
 ```
 
+The tray app runs as a background process with a system tray icon:
+
+```
+mv7mute-tray
+```
+
+On Windows it is a `windows_subsystem = "windows"` binary — no console window opens. Launch it from the Start menu, a shortcut, or your startup folder.
+
 ## Installation
 
 ### GitHub Releases
@@ -35,10 +43,13 @@ Download the latest archive, installer, or script from the repository's GitHub R
 ### Build from source
 
 ```powershell
-cargo build --release
+cargo build --workspace --release
 ```
 
-Binary: `target\release\mv7mute.exe`
+Binary outputs:
+
+- `target\release\mv7mute.exe`
+- `target\release\mv7mute-tray.exe`
 
 ## Release Process
 
@@ -90,16 +101,29 @@ No driver swap (Zadig/WinUSB) is required — the native Windows HID driver work
 ```
 mv7mute/
 ├── Cargo.toml
-├── README.md
-└── src/
-    ├── main.rs   # CLI arg parsing (clap)
-    └── mv7.rs    # MV7 HID abstraction
+├── dist-workspace.toml
+├── mv7mute-core/
+│   └── src/
+│       ├── lib.rs    # command orchestration and typed tray-facing state API
+│       └── mv7.rs    # MV7 HID abstraction
+├── mv7mute/
+│   └── src/
+│       └── main.rs   # thin CLI entrypoint
+└── mv7mute-tray/
+    └── src/
+        ├── main.rs   # entry point: event loop wiring and single-instance guard
+        ├── app.rs    # App, TrayState, menu handles, ApplicationHandler impl
+        ├── events.rs # UserEvent, WorkerEvent, WorkerCommand
+        ├── icon.rs   # procedural tray icon renderer
+        └── worker.rs # background worker thread and device polling loop
 ```
 
 ## Dependencies
 
 - [`hidapi`](https://crates.io/crates/hidapi) `2` — cross-platform HID access
 - [`clap`](https://crates.io/crates/clap) `4` — CLI argument parsing
+- [`winit`](https://crates.io/crates/winit) `0.30` — tray app event loop
+- [`tray-icon`](https://crates.io/crates/tray-icon) `0.23` — system tray integration
 
 ## Platform Notes
 
@@ -112,9 +136,15 @@ mv7mute/
 | Linux HID permissions       | Add a udev rule granting access to the MV7 HID interface        |
 | macOS HID permissions       | No extra setup needed; `hidapi` uses IOHIDManager               |
 
+### Tray-specific notes
+
+- The tray app refreshes device state every 5 seconds by default.
+- On Windows and macOS, left-click toggles mute and right-click opens the menu.
+- On Linux, `tray-icon` depends on GTK/appindicator system libraries and does not emit tray click events, so toggle is available through the tray menu.
+
 ## Roadmap
 
-**System tray app** — a lightweight tray icon that shows the current mute state and toggles on click, without needing a separate hotkey manager. The CLI stays as the backend.
+**Tray settings** — expose refresh interval and tray behavior in the UI instead of keeping them hard-coded.
 
 **GUI with hotkey management** — a settings window to configure the global hotkey, view device status, and control lock behaviour, all in one place.
 

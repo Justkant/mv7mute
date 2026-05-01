@@ -1,0 +1,18 @@
+[package]
+name = "mv7mute-tray"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "System tray controller for mv7mute"
+repository = "https://github.com/Justkant/mv7mute"
+readme = "../README.md"
+license = "MIT"
+keywords = ["mv7", "shure", "mute", "tray"]
+categories = ["gui"]
+publish = false
+
+[dependencies]
+mv7mute-core = { path = "../mv7mute-core" }
+single-instance = "0.3.3"
+tray-icon = "0.23.1"
+winit = "0.30.12"

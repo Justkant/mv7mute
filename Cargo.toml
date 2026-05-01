@@ -1,37 +1,6 @@
-[package]
-name = "mv7mute"
-version = "0.1.0"
-edition = "2024"
-rust-version = "1.85"
-description = "Atomic CLI to control mute and lock state on the Shure MV7"
-repository = "https://github.com/Justkant/mv7mute"
-readme = "README.md"
-license = "MIT"
-keywords = ["mv7", "shure", "mute", "audio", "cli"]
-categories = ["command-line-utilities"]
-publish = false
-
-[dependencies]
-clap = { version = "4.6.1", features = ["derive"] }
-hidapi = "2.6.5"
-
-[package.metadata.dist]
-dist = true
-
-[workspace.metadata.dist]
-cargo-dist-version = "0.31.0"
-ci = ["github"]
-installers = ["shell", "powershell"]
-targets = [
-  "x86_64-pc-windows-msvc",
-  "x86_64-apple-darwin",
-  "aarch64-apple-darwin",
-  "x86_64-unknown-linux-gnu",
-]
-pr-run-mode = "plan"
-create-release = true
-github-release = "announce"
-install-path = "CARGO_HOME"
+[workspace]
+members = ["mv7mute-core", "mv7mute", "mv7mute-tray"]
+resolver = "3"
 
 [profile.dist]
 inherits = "release"

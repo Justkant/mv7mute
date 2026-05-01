@@ -10,3 +10,13 @@ pr_labels = ["release"]
 name = "mv7mute"
 git_release_enable = false
 publish = false
+
+[[package]]
+name = "mv7mute-core"
+git_release_enable = false
+publish = false
+
+[[package]]
+name = "mv7mute-tray"
+git_release_enable = false
+publish = false

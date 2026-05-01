@@ -1,0 +1,15 @@
+[package]
+name = "mv7mute-core"
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.85"
+description = "Core MV7 mute and lock control logic"
+repository = "https://github.com/Justkant/mv7mute"
+readme = "../README.md"
+license = "MIT"
+keywords = ["mv7", "shure", "mute", "audio"]
+categories = ["hardware-support"]
+publish = false
+
+[dependencies]
+hidapi = "2.6.5"

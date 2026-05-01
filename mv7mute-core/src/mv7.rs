@@ -96,7 +96,6 @@ impl<T: Transport> Mv7<T> {
         Ok(())
     }
 
-    /// Re-lock the device if it was locked when we opened it.
     pub fn restore_lock(&mut self) -> Result<(), String> {
         if self.restore_lock_armed {
             self.set_lock(true)?;
@@ -109,7 +108,6 @@ impl<T: Transport> Mv7<T> {
         self.restore_lock_armed = false;
     }
 
-    /// Returns the lock state as it was before this invocation unlocked it.
     pub fn was_locked(&self) -> bool {
         self.was_locked
     }

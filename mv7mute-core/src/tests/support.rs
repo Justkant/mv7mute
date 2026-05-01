@@ -1,5 +1,5 @@
 use crate::mv7::{Mv7, Transport};
-use crate::{run_with_mv7, Command};
+use crate::{Command, run_with_mv7};
 use std::cell::RefCell;
 use std::collections::VecDeque;
 use std::rc::Rc;
