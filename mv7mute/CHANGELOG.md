@@ -1,12 +1,15 @@
 # Changelog
 
-Per-app release notes now live in `mv7mute/CHANGELOG.md` and `mv7mute-tray/CHANGELOG.md`.
+All notable changes to this package will be documented in this file.
 
 The format is based on Keep a Changelog, and versions follow Semantic Versioning.
 
 ## [Unreleased]
 
-- Workspace-level changes only. Package release notes are tracked in the package changelogs.
+### Changed
+
+- Split the project into a Cargo workspace with dedicated `mv7mute-core`, `mv7mute`, and `mv7mute-tray` crates.
+- Kept the CLI crate thin by moving MV7 command logic into the core crate.
 
 ## [0.1.0] - 2026-04-30
 

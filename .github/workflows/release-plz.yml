@@ -28,12 +28,21 @@ jobs:
         with:
           toolchain: stable
 
+      - name: Require release token
+        env:
+          RELEASE_PLZ_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
+        run: |
+          if [ -z "$RELEASE_PLZ_TOKEN" ]; then
+            echo "RELEASE_PLZ_TOKEN is required so tags created by release-plz trigger the release workflow." >&2
+            exit 1
+          fi
+
       - name: Run release-plz release
         uses: release-plz/action@1528104d2ca23787631a1c1f022abb64b34c1e11
         with:
           command: release
         env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN }}
 
   release-plz-pr:
     name: Release-plz PR

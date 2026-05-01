@@ -54,8 +54,10 @@ Binary outputs:
 ## Release Process
 
 - Pull requests and pushes run `cargo test` and `cargo clippy --all-targets --all-features` in GitHub Actions.
-- Pushes to `main` run release-plz, which maintains a release PR and creates the version tag when that PR is merged.
-- Pushed version tags trigger cargo-dist's release pipeline: a plan step validates the tag, platform jobs build the archives and installers, and the final announce step creates the GitHub Release with cargo-dist-generated notes.
+- Pushes to `main` run release-plz, which maintains release PRs and creates app-specific tags when those PRs are merged. The `release-plz release` job requires a `RELEASE_PLZ_TOKEN` secret so the tag push can trigger the release workflow.
+- `mv7mute-v*` publishes the CLI as its own GitHub release.
+- `mv7mute-tray-v*` publishes the tray app as its own GitHub release.
+- Pushed app tags trigger cargo-dist's release pipeline: a plan step validates the tag, platform jobs build the archives and installers for that app, and the final announce step creates the matching GitHub Release with cargo-dist-generated notes.
 
 ### Hotkey binding
 

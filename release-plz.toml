@@ -1,25 +1,32 @@
 [workspace]
 git_only = true
 publish = false
+release = false
 release_always = false
-changelog_path = "CHANGELOG.md"
 repo_url = "https://github.com/Justkant/mv7mute"
 pr_labels = ["release"]
 
 [[package]]
 name = "mv7mute"
-git_tag_name = "v{{ version }}"
+release = true
+git_tag_name = "mv7mute-v{{ version }}"
 git_release_enable = false
 publish = false
+changelog_path = "mv7mute/CHANGELOG.md"
+changelog_include = ["mv7mute-core"]
 
 [[package]]
 name = "mv7mute-core"
+release = false
 git_tag_enable = false
 git_release_enable = false
 publish = false
 
 [[package]]
 name = "mv7mute-tray"
-git_tag_enable = false
+release = true
+git_tag_name = "mv7mute-tray-v{{ version }}"
 git_release_enable = false
 publish = false
+changelog_path = "mv7mute-tray/CHANGELOG.md"
+changelog_include = ["mv7mute-core"]
