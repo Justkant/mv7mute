@@ -11,6 +11,9 @@ keywords = ["mv7", "shure", "mute", "audio", "cli"]
 categories = ["command-line-utilities"]
 publish = false
 
+[package.metadata.dist]
+dist = true
+
 [dependencies]
 clap = { version = "4.6.1", features = ["derive"] }
 mv7mute-core = { path = "../mv7mute-core" }

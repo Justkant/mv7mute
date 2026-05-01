@@ -3,8 +3,7 @@ name: Release
 on:
   push:
     tags:
-      - "mv7mute-v*"
-      - "mv7mute-tray-v*"
+      - "v*"
 
 permissions:
   contents: write

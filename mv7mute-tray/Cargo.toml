@@ -11,6 +11,9 @@ keywords = ["mv7", "shure", "mute", "tray"]
 categories = ["gui"]
 publish = false
 
+[package.metadata.dist]
+dist = true
+
 [dependencies]
 mv7mute-core = { path = "../mv7mute-core" }
 single-instance = "0.3.3"
