@@ -6,6 +6,17 @@ The format is based on Keep a Changelog, and versions follow Semantic Versioning
 
 ## [Unreleased]
 
+## [0.1.1](https://github.com/Justkant/mv7mute/compare/mv7mute-v0.1.0...mv7mute-v0.1.1) - 2026-05-01
+
+### Added
+
+- *(release)* switch to per-app releases and changelogs
+- add mv7mute-tray and restructure as a Cargo workspace
+
+### Fixed
+
+- *(ci)* use single v{{ version }} tag for unified releases
+
 ### Changed
 
 - Split the project into a Cargo workspace with dedicated `mv7mute-core`, `mv7mute`, and `mv7mute-tray` crates.
