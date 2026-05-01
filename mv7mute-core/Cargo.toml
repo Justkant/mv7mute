@@ -9,7 +9,6 @@ readme = "../README.md"
 license = "MIT"
 keywords = ["mv7", "shure", "mute", "audio"]
 categories = ["hardware-support"]
-publish = false
 
 [dependencies]
 hidapi = "2.6.5"

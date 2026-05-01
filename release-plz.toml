@@ -18,11 +18,12 @@ changelog_include = ["mv7mute-core"]
 
 [[package]]
 name = "mv7mute-core"
-release = false
+release = true
 git_only = false
-git_tag_enable = false
+git_tag_name = "mv7mute-core-v{{ version }}"
 git_release_enable = false
-publish = false
+publish = true
+changelog_update = false
 
 [[package]]
 name = "mv7mute-tray"
