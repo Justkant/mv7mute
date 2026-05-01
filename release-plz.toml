@@ -1,5 +1,5 @@
 [workspace]
-git_only = true
+git_only = false
 publish = false
 release = false
 release_always = false
@@ -9,6 +9,7 @@ pr_labels = ["release"]
 [[package]]
 name = "mv7mute"
 release = true
+git_only = true
 git_tag_name = "mv7mute-v{{ version }}"
 git_release_enable = false
 publish = false
@@ -18,6 +19,7 @@ changelog_include = ["mv7mute-core"]
 [[package]]
 name = "mv7mute-core"
 release = false
+git_only = false
 git_tag_enable = false
 git_release_enable = false
 publish = false
@@ -25,6 +27,7 @@ publish = false
 [[package]]
 name = "mv7mute-tray"
 release = true
+git_only = true
 git_tag_name = "mv7mute-tray-v{{ version }}"
 git_release_enable = false
 publish = false
