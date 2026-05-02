@@ -6,6 +6,17 @@ The format is based on Keep a Changelog, and versions follow Semantic Versioning
 
 ## [Unreleased]
 
+## [0.1.3](https://github.com/Justkant/mv7mute/compare/v0.1.2...v0.1.3) - 2026-05-02
+
+### Added
+
+- *(tray)* show app version in tray status menu
+
+### Fixed
+
+- *(windows)* restore tray MSI start menu shortcut and icon
+- *(windows)* restore tray MSI packaging with shortcut icon
+
 ## [0.1.2](https://github.com/Justkant/mv7mute/compare/v0.1.1...v0.1.2) - 2026-05-02
 
 ### Added
