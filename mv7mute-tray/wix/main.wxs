@@ -86,7 +86,7 @@
         <Property Id='DiskPrompt' Value='mv7mute-tray Installation'/>
 
         <Directory Id='TARGETDIR' Name='SourceDir'>
-            <Directory Id='ProgramMenuFolder'>
+            <Directory Id='CommonProgramsFolder'>
                 <Directory Id='ApplicationProgramsFolder' Name='MV7 Mute'>
                     <Component Id='ProgramMenuDir' Guid='*'>
                         <RemoveFolder Id='ApplicationProgramsFolder' On='uninstall'/>
@@ -146,8 +146,8 @@
                                     Name='MV7 Mute'
                                     Description='System tray controller for the Shure MV7'
                                     WorkingDirectory='Bin'
-                                    Advertise='no'
-                                    Icon='ProductICO'
+                                    Advertise='yes'
+                                    Icon='mv7mute_tray.exe'
                                     IconIndex='0'/>
                             </File>
                         </Component>
@@ -194,8 +194,9 @@
           The product icon is the graphic that appears in the Add/Remove
           Programs control panel for the application.
         -->
-        <Icon Id='ProductICO' SourceFile='wix\Product.ico'/>
-        <Property Id='ARPPRODUCTICON' Value='ProductICO' />
+        <Icon Id='mv7mute_tray.exe' SourceFile='mv7mute-tray\wix\Product.ico'/>
+        <Icon Id='Product.ico' SourceFile='mv7mute-tray\wix\Product.ico'/>
+        <Property Id='ARPPRODUCTICON' Value='Product.ico' />
 
         <Property Id='ARPHELPLINK' Value='https://github.com/Justkant/mv7mute'/>
         
