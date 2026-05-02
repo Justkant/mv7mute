@@ -51,7 +51,7 @@ jobs:
     name: Release-plz PR
     needs:
       - release-plz-release
-    if: ${{ github.repository_owner == 'Justkant' }}
+    if: ${{ always() && github.repository_owner == 'Justkant' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
