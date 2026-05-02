@@ -22,6 +22,7 @@ license = false
 eula = false
 
 [dependencies]
+image = { version = "0.25.6", default-features = false, features = ["png"] }
 mv7mute-core = { version = "0.1.0", path = "../mv7mute-core" }
 single-instance = "0.3.3"
 tray-icon = "0.23.1"
