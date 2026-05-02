@@ -29,6 +29,7 @@ const MENU_ID_QUIT: &str = "quit";
 pub struct TrayState {
     pub device: Option<DeviceState>,
     pub last_error: Option<String>,
+    pub startup_error: Option<String>,
 }
 
 impl Default for TrayState {
@@ -36,6 +37,7 @@ impl Default for TrayState {
         Self {
             device: None,
             last_error: Some("Waiting for first refresh".to_string()),
+            startup_error: None,
         }
     }
 }
@@ -142,10 +144,15 @@ impl App {
         }
 
         menu_handles.startup_item.set_text(if cfg!(target_os = "windows") {
-            format!(
+            let status = format!(
                 "Launch at startup: {}",
                 if self.launch_at_startup { "On" } else { "Off" }
-            )
+            );
+            if self.state.startup_error.is_some() {
+                format!("{status} (failed)")
+            } else {
+                status
+            }
         } else {
             "Launch at startup (Windows only)".to_string()
         });
@@ -164,6 +171,11 @@ impl App {
                 })
                 .or_else(|| self.state.last_error.clone())
                 .unwrap_or_else(|| "mv7mute tray".to_string());
+            let tooltip = if let Some(startup_error) = &self.state.startup_error {
+                format!("{tooltip} | {startup_error}")
+            } else {
+                tooltip
+            };
             let _ = tray_icon.set_tooltip(Some(tooltip));
         }
     }
@@ -184,10 +196,10 @@ impl App {
         match startup::set_enabled(!self.launch_at_startup) {
             Ok(enabled) => {
                 self.launch_at_startup = enabled;
-                self.state.last_error = None;
+                self.state.startup_error = None;
             }
             Err(error) => {
-                self.state.last_error = Some(format!("Startup setting failed: {error}"));
+                self.state.startup_error = Some(format!("Startup setting failed: {error}"));
             }
         }
         self.refresh_ui();
