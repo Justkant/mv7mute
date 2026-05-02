@@ -6,6 +6,22 @@ The format is based on Keep a Changelog, and versions follow Semantic Versioning
 
 ## [Unreleased]
 
+## [0.1.2](https://github.com/Justkant/mv7mute/compare/v0.1.1...v0.1.2) - 2026-05-02
+
+### Added
+
+- *(tray)* use bundled microphone assets for stateful tray icons
+- *(tray)* add Windows Start menu integration and startup toggle
+
+### Fixed
+
+- *(startup)* validate Run entry against current tray executable
+- *(tray)* keep startup toggle failures visible after device refresh
+
+### Other
+
+- *(release)* add changelog tracking for mv7mute-core
+
 ## [0.1.1](https://github.com/Justkant/mv7mute/compare/v0.1.0...v0.1.1) - 2026-05-02
 
 ### Changed

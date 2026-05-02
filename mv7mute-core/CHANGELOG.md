@@ -5,3 +5,13 @@ All notable changes to this package will be documented in this file.
 The format is based on Keep a Changelog, and versions follow Semantic Versioning.
 
 ## [Unreleased]
+
+## [0.1.1](https://github.com/Justkant/mv7mute/compare/mv7mute-core-v0.1.0...mv7mute-core-v0.1.1) - 2026-05-02
+
+### Added
+
+- *(tray)* add Windows Start menu integration and startup toggle
+
+### Other
+
+- *(release)* add changelog tracking for mv7mute-core
