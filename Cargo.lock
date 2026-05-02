@@ -1176,7 +1176,7 @@ dependencies = [
 
 [[package]]
 name = "mv7mute"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "clap",
  "mv7mute-core",
@@ -1191,7 +1191,7 @@ dependencies = [
 
 [[package]]
 name = "mv7mute-tray"
-version = "0.1.1"
+version = "0.1.2"
 dependencies = [
  "mv7mute-core",
  "single-instance",
