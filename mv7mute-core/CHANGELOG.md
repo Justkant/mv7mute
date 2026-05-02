@@ -8,10 +8,7 @@ The format is based on Keep a Changelog, and versions follow Semantic Versioning
 
 ## [0.1.1](https://github.com/Justkant/mv7mute/compare/mv7mute-core-v0.1.0...mv7mute-core-v0.1.1) - 2026-05-02
 
-### Added
-
-- *(tray)* add Windows Start menu integration and startup toggle
-
 ### Other
 
+- No core-library behavior changes in this release.
 - *(release)* add changelog tracking for mv7mute-core

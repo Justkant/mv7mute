@@ -1,6 +1,6 @@
 # mv7mute
 
-A minimal MV7 mute toolkit with a reusable core crate, a thin CLI, and a tray app. The CLI is designed for hotkey binding, and the tray app provides a cross-platform desktop surface built with `winit` and `tray-icon`.
+A minimal MV7 mute toolkit with a reusable core crate, a thin CLI, and a tray app. The CLI is designed for hotkey binding, and the tray app provides a desktop tray surface built with `winit` and `tray-icon`.
 
 ## The Problem
 
@@ -34,7 +34,7 @@ On Windows it is a `windows_subsystem = "windows"` binary — no console window 
 
 ### GitHub Releases
 
-Download the latest archive, installer, or script from the repository's GitHub Releases page.
+Download the latest `vX.Y.Z` archive, installer, or script from the repository's GitHub Releases page.
 
 - Windows: `.zip`, PowerShell installer, and MSI
 - macOS: `.tar.gz` archive and shell installer
@@ -54,10 +54,8 @@ Binary outputs:
 ## Release Process
 
 - Pull requests and pushes run `cargo test` and `cargo clippy --all-targets --all-features` in GitHub Actions.
-- Pushes to `main` run release-plz, which maintains release PRs and creates app-specific tags when the version bump from a merged release PR lands on `main`. `release_always = true` is intentional here so releases still happen when GitHub squash-merges the release PR. The `release-plz release` job requires a `RELEASE_PLZ_TOKEN` secret so the tag push can trigger the release workflow.
-- `mv7mute-v*` publishes the CLI as its own GitHub release.
-- `mv7mute-tray-v*` publishes the tray app as its own GitHub release.
-- Pushed app tags trigger cargo-dist's release pipeline: a plan step validates the tag, platform jobs build the archives and installers for that app, and the final announce step creates the matching GitHub Release with cargo-dist-generated notes.
+- Pushes to `main` run release-plz. It maintains release PRs, creates the shared app tag `vX.Y.Z` for the CLI and tray binaries, and publishes the library crate with its own `mv7mute-core-vX.Y.Z` tag when needed. `release_always = true` is intentional so releases still happen when GitHub squash-merges the release PR. The `release-plz release` job requires a `RELEASE_PLZ_TOKEN` secret so the tag push can trigger the release workflow.
+- Pushed `vX.Y.Z` tags trigger cargo-dist's release pipeline: a plan step validates the tag, platform jobs build the archives and installers for both app packages, and the final announce step creates the matching GitHub Release with cargo-dist-generated notes and assets.
 
 ### Hotkey binding
 
@@ -143,6 +141,7 @@ mv7mute/
 - The tray app refreshes device state every 5 seconds by default.
 - On Windows and macOS, left-click toggles mute and right-click opens the menu.
 - On Linux, `tray-icon` depends on GTK/appindicator system libraries and does not emit tray click events, so toggle is available through the tray menu.
+- Launch-at-startup integration is currently implemented only on Windows.
 
 ## Roadmap
 
