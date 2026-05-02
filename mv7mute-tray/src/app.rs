@@ -45,6 +45,7 @@ impl Default for TrayState {
 struct MenuHandles {
     status_item: MenuItem,
     lock_item: MenuItem,
+    version_item: MenuItem,
     toggle_lock_item: MenuItem,
     startup_item: MenuItem,
 }
@@ -74,6 +75,11 @@ impl App {
         let menu = Menu::new();
         let status_item = MenuItem::new("Status: loading...", false, None);
         let lock_item = MenuItem::new("Lock: unknown", false, None);
+        let version_item = MenuItem::new(
+            format!("Version: {}", env!("CARGO_PKG_VERSION")),
+            false,
+            None,
+        );
         let toggle_item = MenuItem::with_id(MenuId::new(MENU_ID_TOGGLE), "Toggle mute", true, None);
         let toggle_lock_item =
             MenuItem::with_id(MenuId::new(MENU_ID_TOGGLE_LOCK), "Toggle lock", true, None);
@@ -90,6 +96,7 @@ impl App {
         menu.append_items(&[
             &status_item,
             &lock_item,
+            &version_item,
             &PredefinedMenuItem::separator(),
             &toggle_item,
             &toggle_lock_item,
@@ -103,6 +110,7 @@ impl App {
         self.menu_handles = Some(MenuHandles {
             status_item,
             lock_item,
+            version_item,
             toggle_lock_item,
             startup_item,
         });
@@ -142,6 +150,10 @@ impl App {
             menu_handles.lock_item.set_text(format!("Error: {error}"));
             menu_handles.toggle_lock_item.set_text("Toggle lock");
         }
+
+        menu_handles
+            .version_item
+            .set_text(format!("Version: {}", env!("CARGO_PKG_VERSION")));
 
         menu_handles.startup_item.set_text(if cfg!(target_os = "windows") {
             let status = format!(
