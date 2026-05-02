@@ -26,7 +26,8 @@ git_only = false
 git_tag_name = "mv7mute-core-v{{ version }}"
 git_release_enable = false
 publish = true
-changelog_update = false
+changelog_path = "mv7mute-core/CHANGELOG.md"
+changelog_update = true
 
 [[package]]
 name = "mv7mute-tray"
