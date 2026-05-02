@@ -60,7 +60,7 @@
 
     <Product
         Id='*'
-        Name='mv7mute-tray'
+        Name='MV7 Mute Tray'
         UpgradeCode='1C46CA45-AFA3-4AE2-94CA-55B0BE10B9AB'
         Manufacturer='Justkant'
         Language='1033'
@@ -69,7 +69,7 @@
 
         <Package Id='*'
             Keywords='Installer'
-            Description='System tray controller for mv7mute'
+            Description='System tray controller for the Shure MV7'
             Manufacturer='Justkant'
             InstallerVersion='450'
             Languages='1033'
@@ -86,9 +86,22 @@
         <Property Id='DiskPrompt' Value='mv7mute-tray Installation'/>
 
         <Directory Id='TARGETDIR' Name='SourceDir'>
+            <Directory Id='ProgramMenuFolder'>
+                <Directory Id='ApplicationProgramsFolder' Name='MV7 Mute'>
+                    <Component Id='ProgramMenuDir' Guid='*'>
+                        <RemoveFolder Id='ApplicationProgramsFolder' On='uninstall'/>
+                        <RegistryValue
+                            Root='HKLM'
+                            Key='Software\Justkant\MV7 Mute Tray'
+                            Name='installed'
+                            Type='integer'
+                            Value='1'
+                            KeyPath='yes'/>
+                    </Component>
+                </Directory>
+            </Directory>
             <Directory Id='$(var.PlatformProgramFilesFolder)' Name='PFiles'>
                 <Directory Id='APPLICATIONFOLDER' Name='mv7mute-tray'>
-                    
                     <!--
                       Enabling the license sidecar file in the installer is a four step process:
 
@@ -126,7 +139,17 @@
                                 Name='mv7mute-tray.exe'
                                 DiskId='1'
                                 Source='$(var.CargoTargetBinDir)\mv7mute-tray.exe'
-                                KeyPath='yes'/>
+                                KeyPath='yes'>
+                                <Shortcut
+                                    Id='ApplicationStartMenuShortcut'
+                                    Directory='ApplicationProgramsFolder'
+                                    Name='MV7 Mute'
+                                    Description='System tray controller for the Shure MV7'
+                                    WorkingDirectory='Bin'
+                                    Advertise='no'
+                                    Icon='ProductICO'
+                                    IconIndex='0'/>
+                            </File>
                         </Component>
                     </Directory>
                 </Directory>
@@ -150,6 +173,7 @@
             <!--<ComponentRef Id='License'/>-->
 
             <ComponentRef Id='binary0'/>
+            <ComponentRef Id='ProgramMenuDir'/>
 
             <Feature
                 Id='Environment'
@@ -170,8 +194,8 @@
           The product icon is the graphic that appears in the Add/Remove
           Programs control panel for the application.
         -->
-        <!--<Icon Id='ProductICO' SourceFile='wix\Product.ico'/>-->
-        <!--<Property Id='ARPPRODUCTICON' Value='ProductICO' />-->
+        <Icon Id='ProductICO' SourceFile='wix\Product.ico'/>
+        <Property Id='ARPPRODUCTICON' Value='ProductICO' />
 
         <Property Id='ARPHELPLINK' Value='https://github.com/Justkant/mv7mute'/>
         

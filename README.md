@@ -28,7 +28,7 @@ The tray app runs as a background process with a system tray icon:
 mv7mute-tray
 ```
 
-On Windows it is a `windows_subsystem = "windows"` binary — no console window opens. Launch it from the Start menu, a shortcut, or your startup folder.
+On Windows it is a `windows_subsystem = "windows"` binary — no console window opens. Install the MSI to get a Start menu entry that shows up in Windows Search, then launch it from Start or enable launch-at-startup from the tray menu.
 
 ## Installation
 
@@ -36,7 +36,7 @@ On Windows it is a `windows_subsystem = "windows"` binary — no console window 
 
 Download the latest archive, installer, or script from the repository's GitHub Releases page.
 
-- Windows: `.zip` and PowerShell installer
+- Windows: `.zip`, PowerShell installer, and MSI
 - macOS: `.tar.gz` archive and shell installer
 - Linux: `.tar.gz` archive and shell installer
 

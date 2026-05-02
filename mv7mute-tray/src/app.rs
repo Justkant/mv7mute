@@ -1,5 +1,6 @@
 use crate::events::{UserEvent, WorkerCommand, WorkerEvent};
 use crate::icon::build_icon;
+use crate::startup;
 use mv7mute_core::DeviceState;
 use std::sync::mpsc::Sender;
 use std::thread;
@@ -21,6 +22,7 @@ use winit::window::WindowId;
 const MENU_ID_TOGGLE: &str = "toggle";
 const MENU_ID_TOGGLE_LOCK: &str = "toggle-lock";
 const MENU_ID_REFRESH: &str = "refresh";
+const MENU_ID_STARTUP: &str = "startup";
 const MENU_ID_QUIT: &str = "quit";
 
 #[derive(Clone, Debug)]
@@ -42,6 +44,7 @@ struct MenuHandles {
     status_item: MenuItem,
     lock_item: MenuItem,
     toggle_lock_item: MenuItem,
+    startup_item: MenuItem,
 }
 
 pub struct App {
@@ -50,6 +53,7 @@ pub struct App {
     worker_tx: Sender<WorkerCommand>,
     worker_thread: Option<thread::JoinHandle<()>>,
     state: TrayState,
+    launch_at_startup: bool,
 }
 
 impl App {
@@ -60,6 +64,7 @@ impl App {
             worker_tx,
             worker_thread: Some(worker_thread),
             state: TrayState::default(),
+            launch_at_startup: startup::is_enabled().unwrap_or(false),
         }
     }
 
@@ -72,6 +77,12 @@ impl App {
             MenuItem::with_id(MenuId::new(MENU_ID_TOGGLE_LOCK), "Toggle lock", true, None);
         let refresh_item =
             MenuItem::with_id(MenuId::new(MENU_ID_REFRESH), "Refresh now", true, None);
+        let startup_item = MenuItem::with_id(
+            MenuId::new(MENU_ID_STARTUP),
+            "Launch at startup: Off",
+            cfg!(target_os = "windows"),
+            None,
+        );
         let quit_item = MenuItem::with_id(MenuId::new(MENU_ID_QUIT), "Quit", true, None);
 
         menu.append_items(&[
@@ -81,6 +92,7 @@ impl App {
             &toggle_item,
             &toggle_lock_item,
             &refresh_item,
+            &startup_item,
             &PredefinedMenuItem::separator(),
             &quit_item,
         ])
@@ -90,6 +102,7 @@ impl App {
             status_item,
             lock_item,
             toggle_lock_item,
+            startup_item,
         });
 
         let tray_icon = TrayIconBuilder::new()
@@ -128,6 +141,15 @@ impl App {
             menu_handles.toggle_lock_item.set_text("Toggle lock");
         }
 
+        menu_handles.startup_item.set_text(if cfg!(target_os = "windows") {
+            format!(
+                "Launch at startup: {}",
+                if self.launch_at_startup { "On" } else { "Off" }
+            )
+        } else {
+            "Launch at startup (Windows only)".to_string()
+        });
+
         if let Some(tray_icon) = &self.tray_icon {
             let _ = tray_icon.set_icon(build_icon(self.state.device).ok());
             let tooltip = self
@@ -158,6 +180,19 @@ impl App {
         let _ = self.worker_tx.send(WorkerCommand::ToggleLock);
     }
 
+    fn toggle_launch_at_startup(&mut self) {
+        match startup::set_enabled(!self.launch_at_startup) {
+            Ok(enabled) => {
+                self.launch_at_startup = enabled;
+                self.state.last_error = None;
+            }
+            Err(error) => {
+                self.state.last_error = Some(format!("Startup setting failed: {error}"));
+            }
+        }
+        self.refresh_ui();
+    }
+
     fn handle_worker_event(&mut self, event: WorkerEvent) {
         match event {
             WorkerEvent::StateUpdated(state) => {
@@ -177,6 +212,7 @@ impl App {
             MENU_ID_TOGGLE => self.request_toggle(),
             MENU_ID_TOGGLE_LOCK => self.request_toggle_lock(),
             MENU_ID_REFRESH => self.request_refresh(),
+            MENU_ID_STARTUP => self.toggle_launch_at_startup(),
             MENU_ID_QUIT => event_loop.exit(),
             _ => {}
         }

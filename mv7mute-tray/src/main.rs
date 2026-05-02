@@ -3,6 +3,7 @@
 mod app;
 mod events;
 mod icon;
+mod startup;
 mod worker;
 
 use app::App;
